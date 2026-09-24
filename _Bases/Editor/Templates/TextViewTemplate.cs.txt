@@ -1,0 +1,12 @@
+using UniMVC;
+using UnityEngine;
+
+#ROOTNAMESPACEBEGIN#
+public class #SCRIPTNAME# : TextViewBase
+{
+    protected override void OnInitialize()
+    {
+        base.OnInitialize();
+    }
+}
+#ROOTNAMESPACEEND#

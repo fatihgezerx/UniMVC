@@ -1,0 +1,21 @@
+{
+    "name": "UniMVC.Editor",
+    "rootNamespace": "UniMVC",
+    "references": [
+        "UniMVC.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "HAS_UGUI",
+        "HAS_TEXTMESHPRO"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

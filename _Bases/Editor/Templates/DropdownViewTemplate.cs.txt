@@ -1,0 +1,11 @@
+using UniMVC;
+using UnityEngine;
+
+#ROOTNAMESPACEBEGIN#
+public class #SCRIPTNAME# : DropdownViewBase
+{
+    protected override void OnValueChanged(int index)
+    {
+    }
+}
+#ROOTNAMESPACEEND#

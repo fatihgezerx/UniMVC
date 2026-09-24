@@ -1,0 +1,11 @@
+using UniMVC;
+using UnityEngine;
+
+#ROOTNAMESPACEBEGIN#
+public class #SCRIPTNAME# : ToggleViewBase
+{
+    protected override void OnValueChanged(bool isOn)
+    {
+    }
+}
+#ROOTNAMESPACEEND#

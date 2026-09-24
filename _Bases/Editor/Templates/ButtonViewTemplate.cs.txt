@@ -1,0 +1,11 @@
+using UniMVC;
+using UnityEngine;
+
+#ROOTNAMESPACEBEGIN#
+public class #SCRIPTNAME# : ButtonViewBase
+{
+    protected override void OnClick()
+    {
+    }
+}
+#ROOTNAMESPACEEND#
