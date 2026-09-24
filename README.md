@@ -54,11 +54,10 @@ compilation while one is missing, and offers to install it (**Tools > UniMVC > C
 
 ### Installation
 
-Copy the repository into your project as your MVC folder, e.g. `Assets/Scripts/MVC/`. Your own
-`Panels/`, `Buttons/`... folders then sit next to `_Bases/`.
-
-It can also be added through the Package Manager (`+ > Add package from git URL`,
-`https://github.com/fatihgezerx/UniMVC.git`). Your views then go to `Assets/Scripts/MVC/`.
+Copy the repository's contents into `Assets/Scripts/MVC/`. Your own `Panels/`, `Buttons/`... folders
+then sit next to `_Bases/`. Systems that use UniMVC (e.g. InventorySystem, LocalizationSystem) can also
+download it there for you, from their setup dialog. Either way you get the same files, `_Bases/` and
+`UIManager` included, visible and editable in `Assets/Scripts/MVC/`.
 
 ## Quick Start
 
