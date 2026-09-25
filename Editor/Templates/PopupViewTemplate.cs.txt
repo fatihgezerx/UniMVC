@@ -1,0 +1,20 @@
+using UniMVC;
+using UnityEngine;
+
+#ROOTNAMESPACEBEGIN#
+public class #SCRIPTNAME# : PopupViewBase
+{
+    protected override void OnInitialize()
+    {
+        base.OnInitialize();
+    }
+
+    protected override void OnShown()
+    {
+    }
+
+    protected override void OnHidden()
+    {
+    }
+}
+#ROOTNAMESPACEEND#

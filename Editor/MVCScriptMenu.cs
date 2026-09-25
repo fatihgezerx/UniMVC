@@ -16,19 +16,22 @@ namespace UniMVC
         [MenuItem(Menu + "Panel View", false, Priority)]
         private static void CreatePanelView() => Create("PanelView", "NewPanelView.cs");
 
-        [MenuItem(Menu + "Button View", false, Priority + 1)]
+        [MenuItem(Menu + "Popup View", false, Priority + 1)]
+        private static void CreatePopupView() => Create("PopupView", "NewPopupView.cs");
+
+        [MenuItem(Menu + "Button View", false, Priority + 2)]
         private static void CreateButtonView() => Create("ButtonView", "NewButtonView.cs");
 
-        [MenuItem(Menu + "Toggle View", false, Priority + 2)]
+        [MenuItem(Menu + "Toggle View", false, Priority + 3)]
         private static void CreateToggleView() => Create("ToggleView", "NewToggleView.cs");
 
-        [MenuItem(Menu + "Slider View", false, Priority + 3)]
+        [MenuItem(Menu + "Slider View", false, Priority + 4)]
         private static void CreateSliderView() => Create("SliderView", "NewSliderView.cs");
 
-        [MenuItem(Menu + "Dropdown View", false, Priority + 4)]
+        [MenuItem(Menu + "Dropdown View", false, Priority + 5)]
         private static void CreateDropdownView() => Create("DropdownView", "NewDropdownView.cs");
 
-        [MenuItem(Menu + "Text View", false, Priority + 5)]
+        [MenuItem(Menu + "Text View", false, Priority + 6)]
         private static void CreateTextView() => Create("TextView", "NewTextView.cs");
 
         // Templates sit next to this assembly's asmdef, wherever UniMVC was installed.
