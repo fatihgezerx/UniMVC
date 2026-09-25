@@ -108,6 +108,12 @@ to size are collected once, when the panel is initialized. If content changes wh
 panel is hidden. Leave the option off on panels without nested layout components, since they don't need
 it.
 
+When several listeners react to the same change, call `panel.RebuildLayoutLater()` instead. A language
+change is one example: every label updates itself, some of them only after your code has run. The rebuild
+then happens with this frame's UI update, after every script has run and before the frame is drawn, so it
+measures the new texts and nothing is ever shown at the wrong size. Asking for it several times in one
+frame rebuilds once.
+
 ## Controllers
 
 Views only show what they are told; **controllers** tell them. A controller (`ControllerBase`, created with

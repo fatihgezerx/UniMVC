@@ -27,10 +27,12 @@ namespace UniMVC
     /// components are nested - a Content Size Fitter inside a Layout Group - because Unity sizes a parent
     /// before its children. <see cref="RebuildLayout"/> sizes them all at once, innermost first; with
     /// "Rebuild Layout On Show" ticked, the panel calls it every time it is shown.
+    /// <see cref="RebuildLayoutLater"/> does the same with this frame's UI update, once every listener of
+    /// a change (e.g. a language change) has updated its content.
     /// </para>
     /// </remarks>
     [RequireComponent(typeof(CanvasGroup))]
-    public abstract class PanelViewBase : ViewBase
+    public abstract class PanelViewBase : ViewBase, ICanvasElement
     {
         [Tooltip("How the panel appears when shown.")]
         [SerializeField] private PanelOpenAnimation openAnimation;
@@ -155,6 +157,40 @@ namespace UniMVC
                 LayoutRebuilder.ForceRebuildLayoutImmediate(_layoutRects[i]);
             }
         }
+
+        /// <summary>
+        /// <see cref="RebuildLayout"/>, but with this frame's UI update, just before the canvas is drawn:
+        /// for changes several listeners react to at once, e.g. a language change, where some labels may
+        /// only be updated after the caller. Asking again in the same frame rebuilds once. Does nothing
+        /// while the panel is hidden.
+        /// </summary>
+        public void RebuildLayoutLater()
+        {
+            if (gameObject.activeInHierarchy)
+            {
+                CanvasUpdateRegistry.TryRegisterCanvasElementForLayoutRebuild(this);
+            }
+        }
+
+        // Run by the UI update that RebuildLayoutLater queued this panel for: the layout step comes after
+        // every script's update and before the meshes are built, so the new sizes are drawn this frame.
+        void ICanvasElement.Rebuild(CanvasUpdate executing)
+        {
+            if (executing == CanvasUpdate.Layout)
+            {
+                RebuildLayout();
+            }
+        }
+
+        void ICanvasElement.LayoutComplete()
+        {
+        }
+
+        void ICanvasElement.GraphicUpdateComplete()
+        {
+        }
+
+        bool ICanvasElement.IsDestroyed() => this == null;
 
         public override void Hide()
         {
