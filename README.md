@@ -103,13 +103,10 @@ editable in `Assets/Scripts/MVC/`.
 folder they belong to, add them to the matching UI objects, then press **Collect From Children** on the
 `UIManager` and on each panel.
 
-**3. Initialize it once** from your own bootstrap code, after the systems your views use:
-
-```csharp
-[SerializeField] private UIManager uiManager;
-
-private void Awake() => uiManager.Initialize();
-```
+**3. That's it for setup:** the `UIManager` initializes itself in `Start`, and its `Start` is the last
+one of the scene (`DefaultExecutionOrder(32000)`). Every `Awake` and every other `Start` has run by then,
+so the systems your views use are ready first, wherever you initialize them. Each scene's `UIManager`
+sets itself up when that scene loads, so multi-scene games need nothing extra.
 
 **4. Use them:**
 

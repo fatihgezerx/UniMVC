@@ -5,8 +5,8 @@ using UnityEngine;
 namespace UniMVC
 {
     /// <summary>
-    /// The one entry point of the UI: put it on the Canvas and call <see cref="Initialize"/> once from your
-    /// own bootstrap code. It initializes the views listed under its headers in the Inspector (panels,
+    /// The one entry point of the UI: put it on the Canvas and it initializes itself in <c>Start</c>. It
+    /// initializes the views listed under its headers in the Inspector (panels,
     /// popups, buttons...) - each panel then initializes the views listed inside it - then its
     /// <see cref="ControllerBase"/>s, which listen to the game and update the views. Any code, every view
     /// and every controller can reach a view by its type:
@@ -19,8 +19,16 @@ namespace UniMVC
     /// inside any panel (and every controller below it), and each panel the views inside it. Views are
     /// looked up by their exact type; with several of one type, the first registered is returned. Views
     /// created at runtime can join with <see cref="Register"/>.
+    /// <para>
+    /// It initializes itself in <c>Start</c>, and <c>DefaultExecutionOrder(32000)</c> (the highest order
+    /// Unity's Script Execution Order settings allow) makes that the last <c>Start</c> of the scene: every
+    /// system set up in any <c>Awake</c> or <c>Start</c> is ready before any view or controller is. Every
+    /// scene's own UIManager sets itself up when that scene loads. Calling <see cref="Initialize"/> yourself
+    /// earlier still works: it only ever runs once.
+    /// </para>
     /// </remarks>
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(32000)]
     public sealed class UIManager : MonoBehaviour
     {
         [Tooltip("Listen to the game and update the views. Initialized after every view. Keep them on this (always active) object.")]
@@ -38,6 +46,8 @@ namespace UniMVC
         public IReadOnlyList<ControllerBase> Controllers => controllers;
 
         public bool IsInitialized { get; private set; }
+
+        private void Start() => Initialize();
 
         /// <summary>
         /// Registers and initializes every listed view (and through the panels every view inside them), then
