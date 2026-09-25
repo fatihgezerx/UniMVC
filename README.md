@@ -16,7 +16,7 @@ in your MVC folder, one subfolder per kind:
 ```
 MVC/
 ├── Bases/         ViewBase, PanelViewBase, PopupViewBase, ButtonViewBase..., ControllerBase
-├── Editor/        Create menu, templates, Inspector tools
+├── Editor/        Create menu, templates, Inspector tools, Setup/ (the DOTween check)
 ├── UIManager/     UIManager
 ├── Controllers/   your ControllerBase controllers
 ├── Panels/        your PanelViewBase views
@@ -63,6 +63,37 @@ the views that aren't inside any panel or popup (and its controllers), and each 
 views inside it. Run it on the `UIManager` and on each panel after changing the hierarchy, or edit the
 lists by hand.
 
+## Animations
+
+Every panel and popup has an **Animation Settings** header at the top of its Inspector: an **Open
+Animation**, a **Close Animation**, a **Duration** (0.1 - 1 seconds) and an **Ease**. Every animation
+also fades; **Fade In** / **Fade Out** only fade.
+
+| | Open | Close |
+|---|---|---|
+| Panels | Fade In, Zoom Out (110% → 100%), Slide From Left / Right / Top / Bottom, Unfold | Fade Out, Zoom In (100% → 110%), Slide To Left / Right / Top / Bottom, Fold |
+| Popups | Fade In, Pop In (from nothing), Drop In (from above), Rotate In (from -15° and 80%), Unfold, Slide Up, Flip In (from 90° around Y) | Fade Out, Pop Out, Drop Out (falls away), Rotate Out, Fold, Slide Down, Flip Out |
+
+Slides move by the view's own width or height, so a full-screen panel slides in from off screen. Unfold
+opens sideways from a thin line first, then up and down; Fold does it backwards. Try the **OutBack** ease
+with Pop In and **OutBounce** with Drop In.
+
+- The animations run on DOTween, on unscaled time, so a pause menu animates too - never in `Update` or a
+  coroutine.
+- The fade runs on the panel's own `CanvasGroup`, which panels require (added with the script, and to
+  older panels as soon as they are inspected). While an animation plays, that `CanvasGroup` is not
+  interactable: nothing can be clicked on a panel that is still arriving or already leaving.
+- `OnShown()` runs when a panel starts opening and `OnHidden()` when it starts closing; the object is
+  deactivated once the close animation ends. `IsOpen` is false from the moment it starts closing (unlike
+  `IsVisible`), and `Toggle()` follows it: showing a closing panel turns it straight back.
+- Whether a panel starts open is simply whether its object is active in the scene.
+
+DOTween is optional. A small setup script (`Editor/Setup/`, with no dependencies of its own) sets the
+`HAS_DOTWEEN` scripting define symbol while `DOTween.dll` is in the project and clears it when it isn't;
+the animation code compiles only under that symbol. When DOTween is missing, a dialog says so (once per
+editor session) and offers its Asset Store page. The animation settings are kept either way, so
+installing DOTween later brings the animations back as they were set up.
+
 ## Controllers
 
 Views only show what they are told; **controllers** tell them. A controller (`ControllerBase`, created with
@@ -87,7 +118,10 @@ public class HealthController : ControllerBase
 ### Requirements
 
 - Unity 2021.3 LTS or newer
-- uGUI and TextMeshPro (`com.unity.ugui`), included by default. UniMVC has no other dependencies.
+- uGUI and TextMeshPro (`com.unity.ugui`), included by default.
+- Optional: [DOTween](https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676)
+  (free, from the Asset Store), for [panel and popup animations](#animations). Without it UniMVC compiles
+  and works the same; panels and popups just open and close at once.
 
 ### Installation
 
