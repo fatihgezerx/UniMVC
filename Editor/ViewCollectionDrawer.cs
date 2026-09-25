@@ -23,7 +23,8 @@ namespace UniMVC
             ("toggles", "Toggles", "Toggle Views"),
             ("sliders", "Sliders", "Slider Views"),
             ("dropdowns", "Dropdowns", "Dropdown Views"),
-            ("texts", "Texts", "Text Views")
+            ("texts", "Texts", "Text Views"),
+            ("images", "Images", "Image Views")
         };
 
         private static GUIStyle _headerStyle;

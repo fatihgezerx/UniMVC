@@ -44,6 +44,7 @@ drops its `LanguageDropdown` into `MVC/Dropdowns/`. Once copied, they are your o
 | `SliderViewBase` | `Slider` | `OnValueChanged(float)` · `SetValue(value, max)` |
 | `DropdownViewBase` | `TMP_Dropdown` | `OnValueChanged(int)` · `SetOptions(list, selected)` |
 | `TextViewBase` | `TMP_Text` | `SetText(string)` |
+| `ImageViewBase` | `Image` | `SetSprite(Sprite)` |
 
 Every view is initialized exactly once, even while it is hidden. `OnInitialize` is where components are
 cached and listeners are added. When you override it in a panel or popup, call `base.OnInitialize()`
@@ -53,7 +54,7 @@ calling its `OnValueChanged`.
 ## The UIManager and panels in the Inspector
 
 The `UIManager`, every panel and every popup show their views in the Inspector under one header per kind
-(**Panels**, **Popups**, **Buttons**, **Toggles**, **Sliders**, **Dropdowns**, **Texts**), each with its
+(**Panels**, **Popups**, **Buttons**, **Toggles**, **Sliders**, **Dropdowns**, **Texts**, **Images**), each with its
 list below. `UIManager.Initialize()` initializes the views in its lists, and each panel then initializes
 the views in its own lists, all the way down.
 

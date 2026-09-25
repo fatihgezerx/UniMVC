@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UniMVC
 {
     /// <summary>
-    /// A set of views grouped by kind - panels, popups, buttons, toggles, sliders, dropdowns, texts - as
+    /// A set of views grouped by kind - panels, popups, buttons, toggles, sliders, dropdowns, texts, images - as
     /// shown under their headers in the Inspector of a <see cref="UIManager"/> or a
     /// <see cref="PanelViewBase"/>. <see cref="Initialize"/> registers every view in it with the
     /// <see cref="UIManager"/> and initializes it, so a panel initializes the views it owns in turn.
@@ -20,6 +20,7 @@ namespace UniMVC
         [SerializeField] private SliderViewBase[] sliders = Array.Empty<SliderViewBase>();
         [SerializeField] private DropdownViewBase[] dropdowns = Array.Empty<DropdownViewBase>();
         [SerializeField] private TextViewBase[] texts = Array.Empty<TextViewBase>();
+        [SerializeField] private ImageViewBase[] images = Array.Empty<ImageViewBase>();
 
         public IReadOnlyList<PanelViewBase> Panels => panels;
         public IReadOnlyList<PopupViewBase> Popups => popups;
@@ -28,6 +29,7 @@ namespace UniMVC
         public IReadOnlyList<SliderViewBase> Sliders => sliders;
         public IReadOnlyList<DropdownViewBase> Dropdowns => dropdowns;
         public IReadOnlyList<TextViewBase> Texts => texts;
+        public IReadOnlyList<ImageViewBase> Images => images;
 
         /// <summary>Registers every view with <paramref name="ui"/> (if any) and initializes it. Empty entries are skipped.</summary>
         public void Initialize(UIManager ui)
@@ -39,6 +41,7 @@ namespace UniMVC
             Initialize(sliders, ui);
             Initialize(dropdowns, ui);
             Initialize(texts, ui);
+            Initialize(images, ui);
         }
 
         /// <summary>Adds <paramref name="view"/> to the list of its kind, unless it is already there.</summary>
@@ -97,6 +100,7 @@ namespace UniMVC
             sliders = Array.Empty<SliderViewBase>();
             dropdowns = Array.Empty<DropdownViewBase>();
             texts = Array.Empty<TextViewBase>();
+            images = Array.Empty<ImageViewBase>();
         }
 
         // The closest panel (or popup) above the view, not counting the view itself.

@@ -34,6 +34,9 @@ namespace UniMVC
         [MenuItem(Menu + "Text View", false, Priority + 6)]
         private static void CreateTextView() => Create("TextView", "NewTextView.cs");
 
+        [MenuItem(Menu + "Image View", false, Priority + 7)]
+        private static void CreateImageView() => Create("ImageView", "NewImageView.cs");
+
         [MenuItem(Menu + "Controller", false, Priority + 20)]
         private static void CreateController() => Create("Controller", "NewController.cs");
 
