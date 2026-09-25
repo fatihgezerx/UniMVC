@@ -65,10 +65,7 @@ on the `UIManager` and on each panel after changing the hierarchy, or edit the l
 ### Requirements
 
 - Unity 2021.3 LTS or newer
-- uGUI and TextMeshPro (`com.unity.ugui`), included by default
-
-Importing UniMVC never breaks your project. A small setup script checks for these, leaves UniMVC out of
-compilation while one is missing, and offers to install it (**Tools > UniMVC > Check Dependencies**).
+- uGUI and TextMeshPro (`com.unity.ugui`), included by default. UniMVC has no other dependencies.
 
 ### Installation
 
