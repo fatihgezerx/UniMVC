@@ -94,6 +94,20 @@ the animation code compiles only under that symbol. When DOTween is missing, a d
 editor session) and offers its Asset Store page. The animation settings are kept either way, so
 installing DOTween later brings the animations back as they were set up.
 
+## Layout
+
+Unity sizes a parent before its children. When layout components are nested, for example a text with
+its own Content Size Fitter inside a popup with a Horizontal Layout Group and a Content Size Fitter,
+content set while the panel was hidden (a new label) makes the panel open at the old size. It only fits
+from the next open on.
+
+Tick **Rebuild Layout On Show** on such a panel or popup: every time it is shown, before its animation,
+it sizes its layout again, innermost first, so it opens at the right size on the first frame. The objects
+to size are collected once, when the panel is initialized. If content changes while the panel is open
+(e.g. a label after a language change), call `panel.RebuildLayout()` yourself. It does nothing while the
+panel is hidden. Leave the option off on panels without nested layout components, since they don't need
+it.
+
 ## Controllers
 
 Views only show what they are told; **controllers** tell them. A controller (`ControllerBase`, created with

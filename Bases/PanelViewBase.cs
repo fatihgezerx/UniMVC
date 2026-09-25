@@ -1,8 +1,10 @@
+using System.Collections.Generic;
 #if HAS_DOTWEEN
 using DG.Tweening;
 using DG.Tweening.Core;
 #endif
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UniMVC
 {
@@ -20,6 +22,12 @@ namespace UniMVC
     /// once the close animation ends. Showing it again while it closes turns it straight back. The fade
     /// runs on the panel's own CanvasGroup, which it requires; while any animation plays, that CanvasGroup
     /// is not interactable, so nothing can be clicked on a panel that is still arriving or already leaving.
+    /// <para>
+    /// Content changed while the panel was hidden (e.g. a new label) can come up at the old size when layout
+    /// components are nested - a Content Size Fitter inside a Layout Group - because Unity sizes a parent
+    /// before its children. <see cref="RebuildLayout"/> sizes them all at once, innermost first; with
+    /// "Rebuild Layout On Show" ticked, the panel calls it every time it is shown.
+    /// </para>
     /// </remarks>
     [RequireComponent(typeof(CanvasGroup))]
     public abstract class PanelViewBase : ViewBase
@@ -36,6 +44,11 @@ namespace UniMVC
         [Tooltip("The easing curve of the open and close animations.")]
         [SerializeField] private AnimationEase animationEase = AnimationEase.OutQuad;
 
+        [Tooltip("Sizes the layout (Layout Groups, Content Size Fitters) inside the panel again every time it is shown, " +
+                 "so content set while it was hidden never appears at its old size. Leave off for panels without " +
+                 "nested layout components.")]
+        [SerializeField] private bool rebuildLayoutOnShow;
+
         [Tooltip("The views inside this panel, by kind. Initialized (and registered with the UIManager) when this panel is.")]
         [SerializeField] private ViewCollection childViews = new();
 
@@ -47,6 +60,10 @@ namespace UniMVC
 #endif
         private bool _isClosing;
         private CanvasGroup _canvasGroup;
+
+        // The objects inside this panel (and the panel itself) that size something - a Layout Group, a
+        // Content Size Fitter... - innermost first, collected once when the panel is initialized.
+        private RectTransform[] _layoutRects = System.Array.Empty<RectTransform>();
 
         // The scale, position and rotation the animations start from and return to, captured when one
         // starts from rest and kept while one interrupts another.
@@ -92,6 +109,7 @@ namespace UniMVC
         protected override void OnInitialize()
         {
             base.OnInitialize();
+            CollectLayoutRects();
             childViews.Initialize(UI);
         }
 
@@ -107,8 +125,35 @@ namespace UniMVC
             StopAnimation();
 
             base.Show();
+
+            // Before the animation, which slides by the panel's size.
+            if (rebuildLayoutOnShow)
+            {
+                RebuildLayout();
+            }
+
             PlayOpen(interrupted);
             OnShown();
+        }
+
+        /// <summary>
+        /// Sizes the layout inside the panel right now, innermost first, so every parent sees its children's
+        /// new sizes in the same frame. Call it after changing content while the panel is open (e.g. a label
+        /// after a language change); it does nothing while the panel is hidden, and runs on its own when the
+        /// panel is shown if "Rebuild Layout On Show" is ticked.
+        /// </summary>
+        public void RebuildLayout()
+        {
+            // Unity skips the layout of inactive objects.
+            if (!gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
+            for (var i = 0; i < _layoutRects.Length; i++)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(_layoutRects[i]);
+            }
         }
 
         public override void Hide()
@@ -171,6 +216,26 @@ namespace UniMVC
 
         // base.Hide from the close animation's callback.
         private void Deactivate() => base.Hide();
+
+        // GetComponentsInChildren lists parents before their children, so walking it backwards gives the
+        // innermost first. An object with several layout components (e.g. a Layout Group and a Content
+        // Size Fitter) is listed once: their components come one after another.
+        private void CollectLayoutRects()
+        {
+            var controllers = GetComponentsInChildren<ILayoutController>(true);
+            var rects = new List<RectTransform>(controllers.Length);
+
+            for (var i = controllers.Length - 1; i >= 0; i--)
+            {
+                if (controllers[i] is Component component && component.transform is RectTransform rect
+                    && (rects.Count == 0 || rects[rects.Count - 1] != rect))
+                {
+                    rects.Add(rect);
+                }
+            }
+
+            _layoutRects = rects.ToArray();
+        }
 
         // Whether an animation can play: the transition has one, DOTween is installed, and the panel is
         // really on screen (an inactive parent would hide it all along).
