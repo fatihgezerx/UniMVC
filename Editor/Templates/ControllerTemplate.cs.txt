@@ -1,0 +1,17 @@
+using UniMVC;
+using UnityEngine;
+
+#ROOTNAMESPACEBEGIN#
+public class #SCRIPTNAME# : ControllerBase
+{
+    protected override void OnInitialize()
+    {
+        // Listen to your systems here and pass what happens on to views, e.g. UI.Get<MyPanel>().
+    }
+
+    private void OnDestroy()
+    {
+        // Stop listening here.
+    }
+}
+#ROOTNAMESPACEEND#

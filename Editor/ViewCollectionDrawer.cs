@@ -28,7 +28,8 @@ namespace UniMVC
 
         private static GUIStyle _headerStyle;
 
-        private static GUIStyle HeaderStyle => _headerStyle ??= new GUIStyle(EditorStyles.boldLabel)
+        /// <summary>The larger bold header style, shared with <see cref="UIManagerEditor"/>.</summary>
+        internal static GUIStyle HeaderStyle => _headerStyle ??= new GUIStyle(EditorStyles.boldLabel)
         {
             fontSize = 14,
             alignment = TextAnchor.LowerLeft
@@ -62,7 +63,7 @@ namespace UniMVC
 
             var buttonRect = new Rect(position.x, y + GroupSpacing, position.width, ButtonHeight);
             if (GUI.Button(buttonRect, new GUIContent("Collect From Children",
-                    "Refills every list with the views below this object that aren't inside another panel or popup.")))
+                    "Refills every list with the views below this object that aren't inside another panel or popup (and, on a UIManager, its controllers).")))
             {
                 Collect(property);
             }
@@ -79,6 +80,11 @@ namespace UniMVC
 
                 Undo.RecordObject(target, "Collect Views");
                 collection.CollectFrom(component.transform, component as PanelViewBase);
+                if (component is UIManager ui)
+                {
+                    ui.CollectControllers();
+                }
+
                 EditorUtility.SetDirty(target);
             }
 

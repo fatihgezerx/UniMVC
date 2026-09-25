@@ -15,9 +15,10 @@ in your MVC folder, one subfolder per kind:
 
 ```
 MVC/
-├── Bases/         ViewBase, PanelViewBase, PopupViewBase, ButtonViewBase...
+├── Bases/         ViewBase, PanelViewBase, PopupViewBase, ButtonViewBase..., ControllerBase
 ├── Editor/        Create menu, templates, Inspector tools
 ├── UIManager/     UIManager
+├── Controllers/   your ControllerBase controllers
 ├── Panels/        your PanelViewBase views
 ├── Popups/        your PopupViewBase views
 ├── Buttons/       your ButtonViewBase views
@@ -57,8 +58,28 @@ list below. `UIManager.Initialize()` initializes the views in its lists, and eac
 the views in its own lists, all the way down.
 
 **Collect From Children** (under the lists) fills them from the hierarchy for you. The `UIManager` gets
-the views that aren't inside any panel or popup, and each panel or popup gets the views inside it. Run it
-on the `UIManager` and on each panel after changing the hierarchy, or edit the lists by hand.
+the views that aren't inside any panel or popup (and its controllers), and each panel or popup gets the
+views inside it. Run it on the `UIManager` and on each panel after changing the hierarchy, or edit the
+lists by hand.
+
+## Controllers
+
+Views only show what they are told; **controllers** tell them. A controller (`ControllerBase`, created with
+**Create > Scripting > MVC > Controller**) listens to your game - events, callbacks - and passes what
+happens on to the views through `UI.Get<T>()`. Put controllers on the `UIManager`'s object and list them
+under its **Controllers** header. That object is always active, so a controller keeps listening while
+the panels it updates are closed. `UIManager.Initialize()` initializes every controller once, after every
+view.
+
+```csharp
+public class HealthController : ControllerBase
+{
+    protected override void OnInitialize() => player.HealthChanged += OnHealthChanged;
+    private void OnDestroy() => player.HealthChanged -= OnHealthChanged;
+
+    private void OnHealthChanged(int health) => UI.Get<HudPanel>().SetHealth(health);
+}
+```
 
 ## Setup
 

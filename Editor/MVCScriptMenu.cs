@@ -5,8 +5,8 @@ using UnityEditor.Compilation;
 namespace UniMVC
 {
     /// <summary>
-    /// <c>Assets/Create/Scripting/MVC/...</c>: creates a new view script from the matching template, in
-    /// the folder selected in the Project window - e.g. a Button View in <c>MVC/Buttons</c>.
+    /// <c>Assets/Create/Scripting/MVC/...</c>: creates a new view (or controller) script from the matching
+    /// template, in the folder selected in the Project window - e.g. a Button View in <c>MVC/Buttons</c>.
     /// </summary>
     internal static class MVCScriptMenu
     {
@@ -33,6 +33,9 @@ namespace UniMVC
 
         [MenuItem(Menu + "Text View", false, Priority + 6)]
         private static void CreateTextView() => Create("TextView", "NewTextView.cs");
+
+        [MenuItem(Menu + "Controller", false, Priority + 20)]
+        private static void CreateController() => Create("Controller", "NewController.cs");
 
         // Templates sit next to this assembly's asmdef, wherever UniMVC was installed.
         private static void Create(string template, string fileName)
