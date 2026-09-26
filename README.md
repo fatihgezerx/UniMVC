@@ -94,6 +94,21 @@ the animation code compiles only under that symbol. When DOTween is missing, a d
 editor session) and offers its Asset Store page. The animation settings are kept either way, so
 installing DOTween later brings the animations back as they were set up.
 
+## Blocking gameplay
+
+Tick **Blocks Gameplay** on a panel or popup the player works in - an inventory window, a pause menu, a
+dialog - and, while it is open, `UIBlocking.IsBlocking` is true. `UIBlocking.Changed` fires with `true` when
+the first such panel opens and with `false` when the last one closes, so any system can stand by meanwhile
+without knowing a single panel (InteractionSystem, for one, stops detecting). A panel counts from the moment
+it starts opening until it starts closing, or until it is switched off or destroyed.
+
+```csharp
+UIBlocking.Changed += blocking => playerCamera.enabled = !blocking;
+```
+
+It is off by default, so HUD panels, tooltips and prompts never block. A panel can start with it on by
+overriding `BlocksGameplayByDefault` (InventorySystem's window does).
+
 ## Layout
 
 Unity sizes a parent before its children. When layout components are nested, for example a text with
@@ -107,12 +122,6 @@ to size are collected once, when the panel is initialized. If content changes wh
 (e.g. a label after a language change), call `panel.RebuildLayout()` yourself. It does nothing while the
 panel is hidden. Leave the option off on panels without nested layout components, since they don't need
 it.
-
-When several listeners react to the same change, call `panel.RebuildLayoutLater()` instead. A language
-change is one example: every label updates itself, some of them only after your code has run. The rebuild
-then happens with this frame's UI update, after every script has run and before the frame is drawn, so it
-measures the new texts and nothing is ever shown at the wrong size. Asking for it several times in one
-frame rebuilds once.
 
 ## Controllers
 

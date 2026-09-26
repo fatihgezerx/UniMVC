@@ -51,6 +51,10 @@ namespace UniMVC
                  "nested layout components.")]
         [SerializeField] private bool rebuildLayoutOnShow;
 
+        [Tooltip("While open, the game stands by: UIBlocking.IsBlocking is true - e.g. interaction stops detecting. " +
+                 "For windows and popups the player works in (inventory, pause menu), not for HUD panels or prompts.")]
+        [SerializeField] private bool blocksGameplay;
+
         [Tooltip("The views inside this panel, by kind. Initialized (and registered with the UIManager) when this panel is.")]
         [SerializeField] private ViewCollection childViews = new();
 
@@ -88,6 +92,18 @@ namespace UniMVC
 
         /// <summary>Whether the panel is shown and not on its way out (<see cref="ViewBase.IsVisible"/> stays true while it closes).</summary>
         public bool IsOpen => IsVisible && !_isClosing;
+
+        /// <summary>Whether this panel counts in <see cref="UIBlocking"/> while it is open.</summary>
+        public bool BlocksGameplay => blocksGameplay;
+
+        /// <summary>What "Blocks Gameplay" starts as when the panel is added (e.g. true for an inventory window).</summary>
+        protected virtual bool BlocksGameplayByDefault => false;
+
+        private void Reset() => blocksGameplay = BlocksGameplayByDefault;
+
+        // Switched off without Hide (its parent deactivated, destroyed): it no longer blocks. A subclass with an
+        // OnDisable of its own hides this one, so blocking panels shouldn't declare one.
+        private void OnDisable() => UIBlocking.Remove(this);
 
         private protected virtual ViewTransition OpenTransition => ViewTransition.Of(openAnimation);
 
@@ -127,6 +143,10 @@ namespace UniMVC
             StopAnimation();
 
             base.Show();
+            if (blocksGameplay)
+            {
+                UIBlocking.Add(this);
+            }
 
             // Before the animation, which slides by the panel's size.
             if (rebuildLayoutOnShow)
@@ -200,6 +220,9 @@ namespace UniMVC
             }
 
             StopAnimation();
+
+            // The game resumes as soon as the panel starts leaving.
+            UIBlocking.Remove(this);
 
             var transition = CloseTransition;
             if (!CanAnimate(transition))
