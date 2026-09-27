@@ -91,6 +91,19 @@ namespace UniMVC
             }
         }
 
+        /// <summary>Drops the empty entries - views destroyed since they were listed (e.g. a UI deleted and built again).</summary>
+        public void RemoveMissing()
+        {
+            panels = WithoutMissing(panels);
+            popups = WithoutMissing(popups);
+            buttons = WithoutMissing(buttons);
+            toggles = WithoutMissing(toggles);
+            sliders = WithoutMissing(sliders);
+            dropdowns = WithoutMissing(dropdowns);
+            texts = WithoutMissing(texts);
+            images = WithoutMissing(images);
+        }
+
         public void Clear()
         {
             panels = Array.Empty<PanelViewBase>();
@@ -103,8 +116,8 @@ namespace UniMVC
             images = Array.Empty<ImageViewBase>();
         }
 
-        // The closest panel (or popup) above the view, not counting the view itself.
-        private static PanelViewBase OwnerOf(ViewBase view)
+        /// <summary>The closest panel (or popup) above <paramref name="view"/>, not counting the view itself: the one it belongs to; null for a UIManager's.</summary>
+        public static PanelViewBase OwnerOf(ViewBase view)
         {
             var parent = view.transform.parent;
             return parent != null ? parent.GetComponentInParent<PanelViewBase>(true) : null;
@@ -133,6 +146,40 @@ namespace UniMVC
                     view.Initialize();
                 }
             }
+        }
+
+        private static T[] WithoutMissing<T>(T[] views) where T : ViewBase
+        {
+            if (views == null)
+            {
+                return Array.Empty<T>();
+            }
+
+            var count = 0;
+            foreach (var view in views)
+            {
+                if (view != null)
+                {
+                    count++;
+                }
+            }
+
+            if (count == views.Length)
+            {
+                return views;
+            }
+
+            var result = new T[count];
+            var i = 0;
+            foreach (var view in views)
+            {
+                if (view != null)
+                {
+                    result[i++] = view;
+                }
+            }
+
+            return result;
         }
 
         private static T[] Append<T>(T[] views, T view) where T : ViewBase

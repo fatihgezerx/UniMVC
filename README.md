@@ -63,6 +63,12 @@ the views that aren't inside any panel or popup (and its controllers), and each 
 views inside it. Run it on the `UIManager` and on each panel after changing the hierarchy, or edit the
 lists by hand.
 
+Editor code that builds UI into a scene (e.g. a system setting up a panel built with
+[Easy UI](https://github.com/fatihgezerx/EasyUI)) does the same with `UISetup`: `EnsureUIManager(canvas)`,
+`EnsureController<T>(ui)` and `ListViews(ui, root)`, which lists every view under `root` in the panel it sits
+in (or the `UIManager`) without touching views listed before, and drops entries of destroyed views - all
+recorded for undo.
+
 ## Animations
 
 Every panel and popup has an **Animation Settings** header at the top of its Inspector: an **Open
