@@ -83,6 +83,11 @@ namespace UniMVC
         private Vector3 _rotation;
 #endif
 
+        // Gamepad navigation: what was selected before this panel took the selection, if it did.
+        private GameObject _selectionBeforeOpen;
+        private bool _tookSelection;
+        private static readonly List<Selectable> SelectableBuffer = new();
+
         // Whether an animation has made the CanvasGroup non-interactable, and what it was before.
         private bool _isLocked;
         private bool _unlockedInteractable;
@@ -156,6 +161,12 @@ namespace UniMVC
 
             PlayOpen(interrupted);
             OnShown();
+
+            // With an animation it's selected once the panel has arrived (see PlayOpen).
+            if (!IsAnimating)
+            {
+                SelectFirstControl();
+            }
         }
 
         /// <summary>
@@ -223,6 +234,7 @@ namespace UniMVC
 
             // The game resumes as soon as the panel starts leaving.
             UIBlocking.Remove(this);
+            RestoreSelection();
 
             var transition = CloseTransition;
             if (!CanAnimate(transition))
@@ -327,6 +339,7 @@ namespace UniMVC
                     _animation = null;
                     _hasRest = false;
                     Unlock();
+                    SelectFirstControl();
                 });
 #endif
         }
@@ -428,6 +441,78 @@ namespace UniMVC
             transform.localRotation = _restRotation * Quaternion.Euler(rotation);
         }
 #endif
+
+        // A panel that blocks gameplay gives a gamepad player something to navigate from: once it is open, and
+        // only when the last input came from a gamepad (a mouse or keyboard player gets no highlighted control),
+        // the first control that can be navigated to is selected; what was selected before comes back on close.
+        private void SelectFirstControl()
+        {
+            if (!blocksGameplay || !IsOpen || !UIInput.IsGamepadActive)
+            {
+                return;
+            }
+
+            var eventSystem = UnityEngine.EventSystems.EventSystem.current;
+            if (eventSystem == null)
+            {
+                return;
+            }
+
+            GetComponentsInChildren(false, SelectableBuffer);
+            Selectable first = null;
+            for (var i = 0; i < SelectableBuffer.Count; i++)
+            {
+                var control = SelectableBuffer[i];
+                if (!control.IsActive() || !control.IsInteractable())
+                {
+                    continue;
+                }
+
+                // One that navigation can leave is better than one that can only be pressed.
+                if (control.navigation.mode != Navigation.Mode.None)
+                {
+                    first = control;
+                    break;
+                }
+
+                if (first == null)
+                {
+                    first = control;
+                }
+            }
+
+            SelectableBuffer.Clear();
+            if (first == null)
+            {
+                return;
+            }
+
+            if (!_tookSelection)
+            {
+                _selectionBeforeOpen = eventSystem.currentSelectedGameObject;
+            }
+
+            _tookSelection = true;
+            eventSystem.SetSelectedGameObject(first.gameObject);
+        }
+
+        private void RestoreSelection()
+        {
+            if (!_tookSelection)
+            {
+                return;
+            }
+
+            _tookSelection = false;
+            var previous = _selectionBeforeOpen;
+            _selectionBeforeOpen = null;
+
+            var eventSystem = UnityEngine.EventSystems.EventSystem.current;
+            if (eventSystem != null)
+            {
+                eventSystem.SetSelectedGameObject(previous != null && previous.activeInHierarchy ? previous : null);
+            }
+        }
 
         // Makes the CanvasGroup non-interactable for an animation, remembering what it was.
         private void Lock()

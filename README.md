@@ -115,6 +115,14 @@ UIBlocking.Changed += blocking => playerCamera.enabled = !blocking;
 It is off by default, so HUD panels, tooltips and prompts never block. A panel can start with it on by
 overriding `BlocksGameplayByDefault` (InventorySystem's window does).
 
+**Gamepad.** A panel that blocks gameplay gives a gamepad player something to navigate from: when it has
+finished opening and the gamepad is the device used last, it selects its first control that navigation can
+leave (otherwise the first one that can be pressed), and puts the previous selection back when it closes.
+A mouse or keyboard player gets no highlighted control. `UIInput.IsGamepadActive` tells which device was
+used last (the gamepad was updated later than the keyboard and the mouse), for your own views that should
+behave differently. It needs the Input System and the `HAS_INPUT_SYSTEM` scripting define symbol (set by the
+setup scripts of the systems that use the Input System); without it nothing is selected.
+
 ## Layout
 
 Unity sizes a parent before its children. When layout components are nested, for example a text with
