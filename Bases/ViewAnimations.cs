@@ -41,6 +41,19 @@ namespace UniMVC
         InOutBounce = 31
     }
 
+    /// <summary>How a <see cref="SliderViewBase"/> shows its value changing.</summary>
+    public enum SliderAnimation
+    {
+        /// <summary>The bar moves at once.</summary>
+        None,
+
+        /// <summary>
+        /// A drop shows a trail: the bar falls at once, while a lighter bar behind it stays where the value was, waits a moment, then
+        /// glides down to the bar. A rise carries the trail up with it. For a health bar that shows how much was lost.
+        /// </summary>
+        Trail
+    }
+
     /// <summary>How a <see cref="PanelViewBase"/> appears when shown. Every animation also fades in.</summary>
     public enum PanelOpenAnimation
     {

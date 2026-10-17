@@ -1,12 +1,14 @@
+#if !HAS_VENEER
 using UnityEditor;
 using UnityEngine;
 
 namespace UniMVC
 {
     /// <summary>
-    /// Inspector of every panel and popup: an Animation Settings header on top - the open and close
-    /// animations (the popup ones on a <see cref="PopupViewBase"/>), their duration and ease - then the
-    /// panel's own fields and its views (drawn by <see cref="ViewCollectionDrawer"/>).
+    /// Fallback Inspector of every panel and popup while Veneer is not installed (the studio look replaces it
+    /// otherwise): an Animation Settings header on top - the open and close animations (the popup ones on a
+    /// <see cref="PopupViewBase"/>), their duration and ease - then the panel's own fields and its views (drawn by
+    /// <see cref="ViewCollectionDrawer"/>).
     /// </summary>
     [CustomEditor(typeof(PanelViewBase), true)]
     [CanEditMultipleObjects]
@@ -19,29 +21,7 @@ namespace UniMVC
             "animationDuration", "animationEase"
         };
 
-        // RequireComponent only adds the CanvasGroup (which the animations fade) to panels added from now on:
-        // give it to older ones as soon as they are inspected - on the next editor tick, not while the
-        // Inspector is being built.
-        private void OnEnable()
-        {
-            var panels = targets;
-            EditorApplication.delayCall += () =>
-            {
-                foreach (var panel in panels)
-                {
-                    if (panel == null)
-                    {
-                        continue;
-                    }
-
-                    var gameObject = ((Component)panel).gameObject;
-                    if (!EditorUtility.IsPersistent(gameObject) && !gameObject.TryGetComponent<CanvasGroup>(out _))
-                    {
-                        Undo.AddComponent<CanvasGroup>(gameObject);
-                    }
-                }
-            };
-        }
+        private void OnEnable() => PanelCanvasGroupFix.EnsureOnNextTick(targets);
 
         public override void OnInspectorGUI()
         {
@@ -85,3 +65,4 @@ namespace UniMVC
         }
     }
 }
+#endif

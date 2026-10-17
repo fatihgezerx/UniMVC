@@ -18,12 +18,21 @@ namespace UniMVC.Setup
     /// This assembly references nothing, so it always compiles. It updates the symbol whenever scripts
     /// reload or DOTween appears or disappears, and clears it when UniMVC itself is deleted, so a leftover
     /// symbol never makes a later copy of UniMVC compile against a missing DOTween.
+    /// <para>
+    /// It also keeps <c>HAS_VENEER</c> in step with the optional <c>Veneer</c> system (set while an assembly
+    /// definition named <c>Veneer.Editor</c> exists). UniMVC's studio-look Inspector assembly lists that symbol as a
+    /// Define Constraint; without the kit Unity's default Inspectors take over. Like the DOTween handling, this variant only keeps
+    /// the symbol in sync and never downloads or asks. The symbol is shared with other systems, so when UniMVC is deleted it is
+    /// set to what is still installed, never cleared blindly.
+    /// </para>
     /// </remarks>
     [InitializeOnLoad]
     internal sealed class DOTweenGuard : AssetPostprocessor, IActiveBuildTargetChanged
     {
         private const string Define = "HAS_DOTWEEN";
         private const string DOTweenFile = "DOTween.dll";
+        private const string KitDefine = "HAS_VENEER";
+        private const string KitAssembly = "Veneer.Editor";
         private const string SetupAsmdefFile = "UniMVC.Setup.asmdef";
         private const string DeclinedKey = "UniMVC.Setup.DOTweenDeclined";
         private const string AssetStoreUrl = "https://assetstore.unity.com/packages/tools/animation/dotween-hotween-v2-27676";
@@ -44,7 +53,7 @@ namespace UniMVC.Setup
             if (ContainsFile(deleted, SetupAsmdefFile))
             {
                 SessionState.EraseBool(DeclinedKey);
-                SetDefine(false);
+                ApplyDefines(false, KitInstalled());
                 return;
             }
 
@@ -53,9 +62,10 @@ namespace UniMVC.Setup
                 SessionState.EraseBool(DeclinedKey);
             }
 
-            // DOTween appeared or disappeared: update the symbol right away, during this import, so the
-            // compilation that follows already uses it.
-            if (ContainsFile(imported, DOTweenFile) || ContainsFile(deleted, DOTweenFile) || ContainsFile(moved, DOTweenFile))
+            // DOTween or an assembly definition (the kit's) appeared or disappeared: update the symbols right
+            // away, during this import, so the compilation that follows already uses them.
+            if (ContainsFile(imported, DOTweenFile) || ContainsFile(deleted, DOTweenFile) || ContainsFile(moved, DOTweenFile)
+                || ContainsAsmdef(imported) || ContainsAsmdef(deleted) || ContainsAsmdef(moved))
             {
                 Refresh(false);
             }
@@ -72,7 +82,7 @@ namespace UniMVC.Setup
             }
 
             var present = AssetExists(DOTweenFile);
-            SetDefine(present);
+            ApplyDefines(present, KitInstalled());
 
             if (present || !prompt || Application.isBatchMode || SessionState.GetBool(DeclinedKey, false))
             {
@@ -106,27 +116,65 @@ namespace UniMVC.Setup
             return false;
         }
 
-        private static void SetDefine(bool present)
+        // Whether the optional Veneer system is in the project: an assembly definition named after its editor assembly.
+        private static bool KitInstalled()
+        {
+            foreach (var guid in AssetDatabase.FindAssets("t:AssemblyDefinitionAsset " + KitAssembly))
+            {
+                if (Path.GetFileNameWithoutExtension(AssetDatabase.GUIDToAssetPath(guid)) == KitAssembly)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // Sets or clears both scripting define symbols in one write (a write triggers a recompile only when something changed).
+        private static void ApplyDefines(bool dotween, bool kit)
         {
             var target = NamedBuildTarget.FromBuildTargetGroup(BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget));
             PlayerSettings.GetScriptingDefineSymbols(target, out var current);
 
             var defines = new List<string>(current);
-            if (present == defines.Contains(Define))
+            var changed = Apply(defines, Define, dotween);
+            changed |= Apply(defines, KitDefine, kit);
+            if (changed)
             {
-                return;
+                PlayerSettings.SetScriptingDefineSymbols(target, defines.ToArray());
+            }
+        }
+
+        private static bool Apply(List<string> defines, string define, bool present)
+        {
+            if (present == defines.Contains(define))
+            {
+                return false;
             }
 
             if (present)
             {
-                defines.Add(Define);
+                defines.Add(define);
             }
             else
             {
-                defines.Remove(Define);
+                defines.Remove(define);
             }
 
-            PlayerSettings.SetScriptingDefineSymbols(target, defines.ToArray());
+            return true;
+        }
+
+        private static bool ContainsAsmdef(string[] paths)
+        {
+            foreach (var path in paths)
+            {
+                if (path.EndsWith(".asmdef"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool ContainsFile(string[] paths, string fileName)

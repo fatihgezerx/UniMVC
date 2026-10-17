@@ -1,0 +1,17 @@
+/* Exact indigo accent (#5B5BD6) of UniMVC. The selectors repeat the kit's accent-preset selectors on purpose: a single
+   ".vn-root" rule has lower specificity than ".vn-root.vn-accent--violet" and would lose to it. */
+.vn-root,
+.vn-root.vn-accent--violet {
+    --vn-accent: #5B5BD6;
+    --vn-accent-soft: rgba(91, 91, 214, 0.18);
+    --vn-accent-line: rgba(91, 91, 214, 0.60);
+    --vn-pressed: rgba(91, 91, 214, 0.28);
+}
+
+.vn-root.vn-root--light,
+.vn-root.vn-root--light.vn-accent--violet {
+    --vn-accent: #4338B5;
+    --vn-accent-soft: rgba(67, 56, 181, 0.14);
+    --vn-accent-line: rgba(67, 56, 181, 0.60);
+    --vn-pressed: rgba(67, 56, 181, 0.22);
+}

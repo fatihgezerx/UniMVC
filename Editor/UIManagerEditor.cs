@@ -1,11 +1,13 @@
+#if !HAS_VENEER
 using UnityEditor;
 using UnityEngine;
 
 namespace UniMVC
 {
     /// <summary>
-    /// Inspector of <see cref="UIManager"/>: its controllers under a Controllers header, then its views under
-    /// one header per kind (drawn by <see cref="ViewCollectionDrawer"/>).
+    /// Fallback Inspector of <see cref="UIManager"/> while Veneer is not installed (the studio look replaces it
+    /// otherwise): its controllers under a Controllers header, then its views under one header per kind (drawn by
+    /// <see cref="ViewCollectionDrawer"/>).
     /// </summary>
     [CustomEditor(typeof(UIManager))]
     internal sealed class UIManagerEditor : Editor
@@ -32,3 +34,4 @@ namespace UniMVC
         }
     }
 }
+#endif

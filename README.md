@@ -41,7 +41,7 @@ drops its `LanguageDropdown` into `MVC/Dropdowns/`. Once copied, they are your o
 | `PopupViewBase` | a dialog or popup | Same as `PanelViewBase`, listed under its own header |
 | `ButtonViewBase` | `Button` | `OnClick()` |
 | `ToggleViewBase` | `Toggle` | `OnValueChanged(bool)` · `SetIsOn(bool)` |
-| `SliderViewBase` | `Slider` | `OnValueChanged(float)` · `SetValue(value, max)` |
+| `SliderViewBase` | `Slider` | `OnValueChanged(float)` · `SetValue(value, max)` · Value Animation (Trail) |
 | `DropdownViewBase` | `TMP_Dropdown` | `OnValueChanged(int)` · `SetOptions(list, selected)` |
 | `TextViewBase` | `TMP_Text` | `SetText(string)` |
 | `ImageViewBase` | `Image` | `SetSprite(Sprite)` |
@@ -68,6 +68,27 @@ Editor code that builds UI into a scene (e.g. a system setting up a panel built 
 `EnsureController<T>(ui)` and `ListViews(ui, root)`, which lists every view under `root` in the panel it sits
 in (or the `UIManager`) without touching views listed before, and drops entries of destroyed views - all
 recorded for undo.
+
+## In the editor
+
+With the optional **Veneer** installed (`Assets/Scripts/Veneer`; the setup script in `Editor/Setup/` sets
+`HAS_VENEER` while it is there), every UniMVC component gets the studio look: an indigo header card with the
+UniMVC logo or a fitting icon and a state pill. Without the kit nothing breaks: Unity's plain Inspectors with the
+**Animation Settings** and view-list headers described here take over, and every editor feature works the same.
+
+- **Panels and popups**: tab **Panel** (the front) has an *Animation* card (open and close animation, a Duration slider and
+  an Ease; the last two hide while both animations are None, and a hint tells when DOTween is missing) and a *Behaviour* card
+  with two chips (*Blocks gameplay*, *Rebuild layout on show*). Tab **Settings** appears only when the panel class adds
+  fields of its own (e.g. the grid size of an inventory panel). Tab **Views** has the **Collect from children** button and one
+  list per kind of view. The pill shows *Open* / *Hidden* in Play Mode. The `CanvasGroup` is still added automatically.
+- **Sliders**: a *Value animation* card (None or Trail; the trail colour, delay, duration and ease show only for Trail) and a
+  *Settings* card for the fields the slider class adds.
+- **UIManager**: tab **Views** (Collect from children and the lists) and tab **Controllers**; the pill counts the listed
+  views and controllers.
+- **Buttons, toggles, dropdowns, texts, images and controllers** get the header card and their own fields as cards.
+
+Selecting several objects, Undo, prefab overrides and the Create menu work as before. The tabs remember their selection for
+the editor session.
 
 ## Animations
 
@@ -100,6 +121,21 @@ the animation code compiles only under that symbol. When DOTween is missing, a d
 editor session) and offers its Asset Store page. The animation settings are kept either way, so
 installing DOTween later brings the animations back as they were set up.
 
+### Slider animation
+
+A slider view has an **Animation Settings** header too, with a **Value Animation**: *None* (the bar moves at once) or
+**Trail**. With a Trail, a value set from code that **drops** (`SetValue`) does not drag the bar down: the bar falls at
+once, while a lighter bar behind it (the *Trail Color*) stays where the value was, waits the *Trail Delay*, then glides
+down to the bar in *Trail Duration* seconds with the *Trail Ease*. A value that rises carries the trail up with it, a
+second blow during the wait restarts the glide from where the trail still is, and a new maximum (`SetValue(value, max)`
+with another max) starts the trail over. It is a health bar's "how much did I lose" effect, but it works on any slider
+(stamina, experience, a progress bar).
+
+The slider makes the trail bar itself (a copy of the fill's image, in the same Fill Area, just behind the fill; nothing
+to wire), and it follows the slider's direction. Like the panels' animations it runs on DOTween on unscaled time, with no
+`Update`, and without DOTween the trail simply follows the bar. Leave it off for a slider the player drags: only
+values set from code animate.
+
 ## Blocking gameplay
 
 Tick **Blocks Gameplay** on a panel or popup the player works in - an inventory window, a pause menu, a
@@ -114,14 +150,6 @@ UIBlocking.Changed += blocking => playerCamera.enabled = !blocking;
 
 It is off by default, so HUD panels, tooltips and prompts never block. A panel can start with it on by
 overriding `BlocksGameplayByDefault` (InventorySystem's window does).
-
-**Gamepad.** A panel that blocks gameplay gives a gamepad player something to navigate from: when it has
-finished opening and the gamepad is the device used last, it selects its first control that navigation can
-leave (otherwise the first one that can be pressed), and puts the previous selection back when it closes.
-A mouse or keyboard player gets no highlighted control. `UIInput.IsGamepadActive` tells which device was
-used last (the gamepad was updated later than the keyboard and the mouse), for your own views that should
-behave differently. It needs the Input System and the `HAS_INPUT_SYSTEM` scripting define symbol (set by the
-setup scripts of the systems that use the Input System); without it nothing is selected.
 
 ## Layout
 
