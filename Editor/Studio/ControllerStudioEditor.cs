@@ -3,15 +3,16 @@ using UnityEditor;
 
 namespace UniMVC
 {
-    /// <summary>Studio-look Inspector of every controller: the UniMVC header card and the controller's own fields.</summary>
+    /// <summary>
+    /// Studio-look Inspector of every controller, drawn from a Veneer layout: the project's own copy made in the Inspector Designer when
+    /// there is one, otherwise <see cref="ControllerDefaultLayout"/> (the UniMVC header card and the automatic "Other" card with the
+    /// controller's own fields).
+    /// </summary>
     [CustomEditor(typeof(ControllerBase), true)]
     [CanEditMultipleObjects]
-    internal sealed class ControllerStudioEditor : VeneerAutoInspector
+    internal sealed class ControllerStudioEditor : VeneerLayoutDrivenInspector<ControllerBase>
     {
+        /// <inheritdoc />
         protected override VeneerBrand Brand => UniMVCBrand.Value;
-
-        protected override string Subtitle => targets.Length > 1 ? "Controller, " + targets.Length + " objects selected" : "Controller";
-
-        protected override string IconName => "bolt";
     }
 }

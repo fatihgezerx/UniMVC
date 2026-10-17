@@ -1,12 +1,9 @@
-using System.Collections.Generic;
+using System;
 using Veneer;
-using UnityEditor;
-using UnityEditor.UIElements;
-using UnityEngine.UIElements;
 
 namespace UniMVC
 {
-    /// <summary>Layout pieces shared by the studio-look Inspectors of UniMVC.</summary>
+    /// <summary>Pieces shared by the default layouts of the studio-look Inspectors of UniMVC.</summary>
     internal static class UniMVCLayout
     {
         // Serialized fields of ViewCollection, in the order the old Inspector listed them, with the label of each list.
@@ -23,68 +20,37 @@ namespace UniMVC
         };
 
         /// <summary>
-        /// The visible top-level fields of <paramref name="serializedObject"/> that are not in <paramref name="skip"/> - the fields a
-        /// subclass adds to its base type. <c>m_Script</c> and <c>[HideInInspector]</c> fields are never included.
+        /// A layout with only the header (the title is the type's name split into words, <paramref name="subtitle"/> under it, an optional
+        /// <paramref name="icon"/>) and the automatic "Other" card, which draws every visible field of the component. It is the design of
+        /// the editors that serve many subclasses with different fields (controllers and the plain views): no card or tab can be fixed
+        /// for them.
         /// </summary>
-        public static List<string> OwnPaths(SerializedObject serializedObject, HashSet<string> skip)
+        /// <param name="type">The base type the layout is registered for.</param>
+        /// <param name="subtitle">The muted line under the title.</param>
+        /// <param name="icon">A kit icon name for the header; null shows the brand's logo.</param>
+        public static VeneerLayout HeaderOnly(Type type, string subtitle, string icon)
         {
-            var paths = new List<string>(8);
-            SerializedProperty iterator = serializedObject.GetIterator();
-            bool enter = true;
-            while (iterator.NextVisible(enter))
-            {
-                enter = false;
-                if (iterator.propertyPath != "m_Script" && !skip.Contains(iterator.propertyPath))
-                {
-                    paths.Add(iterator.propertyPath);
-                }
-            }
-
-            return paths;
-        }
-
-        /// <summary>Adds one field row per path to the current container; arrays become lists.</summary>
-        public static void AddFields(VeneerInspectorBuilder b, List<string> paths)
-        {
-            for (int i = 0; i < paths.Count; i++)
-            {
-                SerializedProperty property = b.SerializedObject.FindProperty(paths[i]);
-                if (property != null && property.isArray && property.propertyType != SerializedPropertyType.String)
-                {
-                    b.List(paths[i]);
-                }
-                else
-                {
-                    b.Field(paths[i]);
-                }
-            }
-        }
-
-        /// <summary>Adds a card with one list per kind of view of the <see cref="ViewCollection"/> at <paramref name="collectionPath"/>.</summary>
-        public static void AddViewLists(VeneerInspectorBuilder b, string collectionPath)
-        {
-            b.Card("Views by kind", "layers", () =>
-            {
-                for (int i = 0; i < ViewKinds.Length; i++)
-                {
-                    b.List(collectionPath + "." + ViewKinds[i].Field, ViewKinds[i].Label);
-                }
-            });
+            VeneerLayout layout = new VeneerLayoutBuilder(type, null, subtitle, icon).Build();
+            layout.ThemeBrand = UniMVCBrand.Value.Name;
+            return layout;
         }
 
         /// <summary>
-        /// Adds the "Collect from children" button. It runs <see cref="ViewCollectionTools.Collect"/> and binds <paramref name="rebind"/> again
-        /// (the page that holds the lists), because the arrays were changed outside the bound lists.
+        /// Starts a card "Views by kind" in the current tab of <paramref name="builder"/>: the Collect item <paramref name="collectId"/>
+        /// first, then one list per kind of view of the <see cref="ViewCollection"/> at <paramref name="collectionPath"/>.
         /// </summary>
-        public static Button AddCollectButton(VeneerInspectorBuilder b, VisualElement rebind, bool primary)
+        /// <param name="builder">The builder of the layout.</param>
+        /// <param name="collectionPath">The path of the ViewCollection field (<c>views</c>, <c>childViews</c>).</param>
+        /// <param name="collectId">The id of the registered "Collect from children" item.</param>
+        public static VeneerLayoutBuilder AddViewKindCard(VeneerLayoutBuilder builder, string collectionPath, string collectId)
         {
-            SerializedObject serializedObject = b.SerializedObject;
-            return b.Button("Collect from children", "refresh", () =>
+            builder.Card("Views by kind", "layers").Custom(collectId);
+            for (int i = 0; i < ViewKinds.Length; i++)
             {
-                ViewCollectionTools.Collect(serializedObject.targetObjects);
-                serializedObject.Update();
-                rebind.Bind(serializedObject);
-            }, ViewCollectionTools.Tooltip, primary);
+                builder.Field(collectionPath + "." + ViewKinds[i].Field, ViewKinds[i].Label, widget: VeneerWidget.List);
+            }
+
+            return builder;
         }
     }
 }

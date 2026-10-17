@@ -3,6 +3,11 @@
 ## [Unreleased]
 
 ### Editor
+- The studio-look Inspectors (controllers, views, panels, popups, sliders, `UIManager`) are now drawn from default layouts that
+  UniMVC ships and that can be customized in the Veneer Inspector Designer (Customize / Reset). The pills, the Collect button and
+  the panel Duration / Ease rows are registered items. Differences: the fields a panel or slider class adds, and the fields of
+  controllers and plain views, are in the automatic "Other" card (the Settings tab and the `[Header]` groups of the automatic
+  Inspector are gone); the Collect button is the first item of its card; "N objects selected" is no longer in the subtitle.
 - New studio-look Inspectors (Veneer) for panels and popups (tabs Panel / Settings / Views), slider views, the
   `UIManager` (tabs Views / Controllers), and an automatic header-card Inspector for buttons, toggles, dropdowns, texts, images
   and controllers. All keep multi-object editing, Undo and prefab overrides; the view lists are the kit's list editor and the

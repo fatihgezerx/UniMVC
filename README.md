@@ -78,14 +78,22 @@ UniMVC logo or a fitting icon and a state pill. Without the kit nothing breaks: 
 
 - **Panels and popups**: tab **Panel** (the front) has an *Animation* card (open and close animation, a Duration slider and
   an Ease; the last two hide while both animations are None, and a hint tells when DOTween is missing) and a *Behaviour* card
-  with two chips (*Blocks gameplay*, *Rebuild layout on show*). Tab **Settings** appears only when the panel class adds
-  fields of its own (e.g. the grid size of an inventory panel). Tab **Views** has the **Collect from children** button and one
-  list per kind of view. The pill shows *Open* / *Hidden* in Play Mode. The `CanvasGroup` is still added automatically.
-- **Sliders**: a *Value animation* card (None or Trail; the trail colour, delay, duration and ease show only for Trail) and a
-  *Settings* card for the fields the slider class adds.
+  with two chips (*Blocks gameplay*, *Rebuild layout on show*). The fields the panel class adds (e.g. the grid size of an
+  inventory panel) are in an automatic **Other** card under the tabs. Tab **Views** has the **Collect from children** button
+  and one list per kind of view. The pill shows *Open* / *Hidden* in Play Mode. The `CanvasGroup` is still added automatically.
+- **Sliders**: a *Value animation* card (None or Trail; the trail colour, delay, duration and ease show only for Trail); the
+  fields the slider class adds are in the automatic **Other** card below it.
 - **UIManager**: tab **Views** (Collect from children and the lists) and tab **Controllers**; the pill counts the listed
   views and controllers.
-- **Buttons, toggles, dropdowns, texts, images and controllers** get the header card and their own fields as cards.
+- **Buttons, toggles, dropdowns, texts, images and controllers** get the header card (icon and subtitle by kind) and their
+  own fields in the automatic **Other** card, because one editor serves every class you write.
+
+Every Inspector above is drawn from a **default layout** that UniMVC ships (`PanelViewDefaultLayout`, `PopupViewDefaultLayout`,
+`SliderViewDefaultLayout`, `UIManagerDefaultLayout`, `ControllerDefaultLayout`, `ViewDefaultLayouts`). In
+`Tools > Veneer > Inspector Designer` you can **Customize** one (a copy you may rearrange, retitle or extend with tabs and
+cards of your own) and **Reset** it to the system default. UniMVC's own items (state pills, the Collect button, the panel
+Duration and Ease rows) can be moved or hidden there, not changed. A customized layout for a base type (e.g. `ViewBase`) is
+used by every view without a layout of its own.
 
 Selecting several objects, Undo, prefab overrides and the Create menu work as before. The tabs remember their selection for
 the editor session.
